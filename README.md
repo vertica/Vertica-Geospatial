@@ -20,8 +20,8 @@ HP Vertica Place leverages the performance and scale of the HP Vertica Analytics
 Requirements
 -------------
 
-* HP Vertica 7.1.1
-* HP Vertica Place 7.1.1
+* HP Vertica 7.1.x
+* HP Vertica Place 7.1.x
 
 Building the Example
 ---------------------
