@@ -83,12 +83,11 @@ ORDER BY count_user_visit DESC;
 
 SELECT AVG(count_seconds)
 FROM
-  (SELECT COUNT(*) count_seconds
-   FROM usr_data,
-        artworks
-   WHERE artworks.gid=4
-     AND ST_Intersects(usr_data.g, artworks.g)
+  (SELECT usr_id, COUNT(*) count_seconds
+   FROM usr_data
+   WHERE STV_Intersect(g USING PARAMETER index='art_index') = 4
    GROUP BY usr_id) foo;
+
 
 -- Answers the question: At the busiest times of day, how physically close are visitors to one another?
 -- Average distance from each visitor at a specific time in a polygon (how close visitors are standing next to one another)
