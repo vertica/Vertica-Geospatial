@@ -85,7 +85,7 @@ SELECT AVG(count_seconds)
 FROM
   (SELECT usr_id, COUNT(*) count_seconds
    FROM usr_data
-   WHERE STV_Intersect(g USING PARAMETER index='art_index') = 4
+   WHERE STV_Intersect(g USING PARAMETERS index='art_index') = 4
    GROUP BY usr_id) foo;
 
 
