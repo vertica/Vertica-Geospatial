@@ -28,6 +28,8 @@ Building the Example
 
 1. Download and install HP Vertica 7.1.x and HP Vertica Place 7.1.x.
 
-   For detailed instructions see http://my.vertica.com/docs/7.1.x/HTML/index.htm#Authoring/InstallationGuide/Other/InstallationGuide.htm and http://my.vertica.com/docs/7.1.x/HTML/index.htm#Authoring/Place/InstallingPlaceOverview.htm
+   For detailed installation instructions see: 
+   * http://my.vertica.com/docs/7.1.x/HTML/index.htm#Authoring/InstallationGuide/Other/InstallationGuide.htm
+   * http://my.vertica.com/docs/7.1.x/HTML/index.htm#Authoring/Place/InstallingPlaceOverview.htm
 
 2. Use the accompanying SQL file to guide you through the example.
