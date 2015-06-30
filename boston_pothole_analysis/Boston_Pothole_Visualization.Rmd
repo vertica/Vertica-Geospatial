@@ -1,0 +1,83 @@
+---
+title: "Visualizing Potholes in Boston Streets"
+author: "HP Vertica Place Development Team"
+output:
+  pdf_document:
+    fig_caption: yes
+    fig_height: 8
+    fig_width: 10
+    highlight: tango
+  html_document:
+    fig_caption: yes
+    fig_height: 8
+    fig_width: 10
+    highlight: tango
+    theme: journal
+---
+
+The `Boston_Pothole_Git.sql` file used Vertica Place to determine the locations of the potholes reported and addressed by the city of Boston, with a focus on determining the intersection of each point location of a pothole and the region in which the pothole occurs. Work through the Place analysis in order to examine how Place formats the data. 
+
+Here, we bring the data into R for visualization. We will use the `ggmap` and `ggplot2` packages in order to create spatial maps of pothole occurrences, using a color gradient to examine the number of potholes per US Census Block.
+
+Code chunks displayed below can be run in your local R instance, provided you've downloaded the corresponding data available in the Vertica/Place Github repository. 
+
+
+### Loading required libraries
+```{r eval=TRUE, echo=TRUE}
+library(ggplot2)
+library(ggmap)
+```
+
+### Importing data output from Place
+```{r eval=TRUE, echo=TRUE}
+new_potholes = read.csv("heatmap.dat")
+```
+
+Next, we'll need to use `ggmap` to obtain a map of downtown Boston and the greater Boston metropolitan area. We then plot pothole occurrences on top of these maps.
+
+
+```{r eval=TRUE, echo=TRUE,  comment="", message=FALSE}
+# Return the maps for different locations
+metro <- get_map(location = "Boston, MA", zoom = 11, maptype='toner-hybrid')
+downtown <- get_map(location = "Boston, MA", zoom = 15, maptype='toner-hybrid')
+
+# Create the heatmap
+heatMapDowntown <- ggmap(downtown) + 
+ 
+  geom_polygon(data = new_potholes, aes(y = Longitude, x = Latitude, 
+                                        group = gid, fill = Ratio), alpha = .7) + 
+  
+  scale_fill_gradient(low = "light yellow", high = "red", guide = "legend", 
+                      na.value="light yellow", limits = c(0,5), breaks = c(0:5))
+
+
+heatMapMetro <- ggmap(metro) + 
+  
+  geom_polygon(data = new_potholes, aes(y = Longitude, x = Latitude, 
+                                        group = gid, fill = Ratio), alpha = .7) + 
+  
+  scale_fill_gradient(low = "light yellow", high = "red", guide = "legend", 
+                      na.value="light yellow", limits = c(0,5), breaks = c(0:5))
+
+```
+
+
+```{r eval=TRUE, echo=F, tidy=TRUE, comment="", message=FALSE, fig.cap="The spatial distribution of the number of potholes per US Census Block for the greater Boston area. "}
+heatMapMetro
+```
+
+
+
+
+```{r eval=TRUE, echo=F, tidy=TRUE, comment="", message=FALSE, fig.cap = "The spatial distribution of the number of potholes per US Census Block for downtown Boston."}
+heatMapDowntown
+```
+
+
+
+
+
+
+
+
+
