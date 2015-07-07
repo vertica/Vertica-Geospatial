@@ -28,7 +28,7 @@
 
 -- Load raw pothole data into a flex table
 CREATE flexible table boston_potholes_raw();
-COPY boston_potholes_raw FROM '/home/acary/projects/geospatial/DEMOS/potholes/Closed_Pothole_Cases.csv' PARSER public.FDelimitedParser (delimiter=',');
+COPY boston_potholes_raw FROM 'potholes/Closed_Pothole_Cases.csv' PARSER public.FDelimitedParser (delimiter=',');
 
 -- Sanity check query
 SELECT MAPTOSTRING(__raw__) FROM boston_potholes_raw LIMIT 1;
