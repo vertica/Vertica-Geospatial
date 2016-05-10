@@ -1,0 +1,73 @@
+---
+title: "Cambridge, MA Expired Meters: Jan. 2014 - July 2015"
+author: "HPE Vertica Place Development Team"
+date: "May 10, 2016"
+output:
+  html_document:
+    fig_caption: yes
+    fig_height: 8
+    fig_width: 10
+    highlight: tango
+    theme: journal
+---
+
+The `camb_parking.sql` file used Vertica Place to export a shapefile containing the total number of tickets per parking space, the parking meter id, and the parking meter's coordinates.
+
+Here, we bring the data into R for visualization. We will use the `rgdal` and `leaflet` packages in order to create spatial maps of parking spaces, using a color gradient to examine the number of expired meter parking tickets per City of Cambridge metered parking spaces.
+
+Code chunks displayed below can be run in your local R instance, provided you've downloaded the corresponding data available in the Vertica/Place Github repository. 
+
+### Loading required libraries
+```{r message=FALSE, warning=FALSE}
+library(rgdal)
+library(leaflet)
+```
+
+### Importing data exported from Place
+```{r eval=TRUE, echo=TRUE}
+expired_meters <- readOGR('C:/camb_parking/expired_meters/expired_meters.shp',
+                          'expired_meters', stringsAsFactors = FALSE)
+```
+
+### Creating our color palette
+
+We will use 9 bins. This will give us a range of approximately 48 tickets per bin.
+
+```{r eval=TRUE, echo=TRUE}
+binpal <- colorBin("YlOrRd", expired_meters@data$num_ticket, 9, pretty = FALSE)
+colors_meters <- binpal(expired_meters@data$num_ticket)
+```
+
+### Popups
+
+Here, we'll create popups that display the metered parking space number and the total number of tickets written for that space.
+
+```{r eval=TRUE, echo=TRUE}
+popups_expired <- apply(expired_meters@data, 1, function(info) {
+  paste0('Expired Meter<br>',
+         '<b>Space Number: </b>', info['meter'], '<br>',
+         '<b>Number of Tickets: </b>', info['num_ticket'], '<br>')
+})
+```
+
+### Plot the map
+
+Next, we'll use `leaflet` to obtain an interactive map. Then, we will plot the parking space polygons on top of the map. When you click on a shape, a popup displays the metered parking space number and the total number of tickets written for that space.
+
+```{r eval=TRUE, echo=TRUE}
+base_map <- leaflet() %>%
+  addProviderTiles("Stamen.TonerLite") %>%
+  addProviderTiles("Stamen.TerrainBackground",
+                   options = providerTileOptions(opacity = 0.55)) %>%
+  addProviderTiles("Stamen.TonerLabels")
+
+base_map %>% 
+  addPolygons(data = expired_meters, 
+              color = colors_meters, fillColor=colors_meters,
+              popup = unname(popups_expired),
+              options = c(pathOptions(), popupOptions(minWidth=100)),
+              group = "Expired Meters") %>%
+  addLegend(position = "topright", pal = binpal,
+            values = expired_meters@data$num_ticket,
+            title = "Meters: # of Tickets")
+```
