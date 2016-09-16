@@ -1,4 +1,4 @@
-Vertica Place
+Vertica Geospatial Examples
 =====
 Copyright 2006 - 2016 HPE Vertica - Hewlett Packard Enterprise
 The information contained herein is subject to change without notice. HPE shall not be liable for technical or editorial errors or omissions contained herein.
