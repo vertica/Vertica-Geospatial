@@ -1,58 +1,66 @@
-# Here we use R, the statistical computing language, to generate a visualization based on the shapefile that Vertica created.
-#
-# Data sets
-# 1. You need to download the us state data from the United States Census Bureau TIGER database
-#    ftp://ftp2.census.gov/geo/tiger/TIGER2015/STATE/
-# 2. You need to run Hurricane_Risk_Analysis_Using_Vertica.sql to generate the heatmap* data
-# 3. Hurricane Bonnie data is available in the vertica/Vertica-Geospatial repository.
-#
-# Loading required libraries 
+Here we use R, the statistical computing language, to generate a visualization based on the shapefile that Vertica created.
+
+Data sets
+1. You need to download the us state data from the United States Census Bureau TIGER database
+   ftp://ftp2.census.gov/geo/tiger/TIGER2015/STATE/
+2. You need to run Hurricane_Risk_Analysis_Using_Vertica.sql to generate the heatmap* data
+3. Hurricane Bonnie data is available in the vertica/Vertica-Geospatial repository.
+
+### Loading required libraries
+```{r eval=TRUE, echo=TRUE}
 require("rgdal")
 require("maptools")
 require("ggplot2")
 require(ggmap)
 require("plyr")
 gpclibPermit()
-#
+```
+
+### Importing data sets
+```{r eval=TRUE, echo=TRUE}
 # Set shapefiles path
 setwd("/home/shapefiles")
-#
-# Importing us state data 
+
+# Importing us state data
 states <- readOGR(".","tl_2015_us_state")
 states <- spTransform(states, CRS("+proj=longlat +datum=WGS84"))
 states@data$id = rownames(states@data)
 states.g = fortify(states, region="id")
 states.df = join(states.g, states@data, by="id")
-#
+
 # Importing Bonnie data
 bonnie <- readOGR(".","BONNIE")
 bonnie@data$id = rownames(bonnie@data)
 bonnie.g = fortify(bonnie, region="id")
 bonnie.df = join(bonnie.g, bonnie@data, by="id")
-#
+
 # Importing data output from Vertica
 heat <- readOGR(".","heatmap")
 heat@data$id = rownames(heat@data)
 heat.g = fortify(heat, region="id")
 heat.df = join(heat.g, heat@data, by="id")
-#
+
 heatm <- readOGR(".","heatmapMulti")
 heatm@data$id = rownames(heatm@data)
 heatm.g = fortify(heatm, region="id")
 heatm.df = join(heatm.g, heatm@data, by="id")
-#
+```
+
+### Creating a heatmap
+```{r eval=TRUE, echo=TRUE}
 # Get a map of the location
 myLocation <- c(-100, 25, -40, 45)
 mymap <- get_map(location = myLocation, maptype='satellite')
-#
+
 # Pick a time frame {160527/2100, 160528/0900, 160529/0300, 160529/0900, 160529/2100, 160530/0300}
 t <- '160529/0900'
+
 # Get one object in the certain time
 bonnie1 <- bonnie.df[bonnie.df$ADVDATE == t,]
 heat1 <- heat.df[heat.df$ADVDATE == t,]
 heatm1 <- heatm.df[heatm.df$ADVDATE == t,]
-#
-# Create the heatmap
+
+# Add map layers
 mmap <- ggmap(mymap) +
 geom_polygon(data=states.df, aes(x=long, y=lat, group=group), alpha=.4, color='grey', size = .2) +
 geom_polygon(data = bonnie1, aes(x=long, y=lat, group=group), fill='white', color='white', alpha=0.4) +
@@ -61,8 +69,7 @@ geom_polygon(data = heatm1, aes(x=long, y=lat, group=group, fill = counts), alph
 scale_fill_gradient(low = "light yellow", high = "red", guide = "legend", name = "Counts", limits=c(18, 17446), breaks = c(2000, 4000, 6000, 8000, 10000, 12000, 14000, 16000, 18000)) +
 labs(x = "Longitude", y = "Latitude", title = "Counts of Landmarks Intersect Hurricane Bonnie") +
 geom_text(data = bonnie1, aes(label = ADVDATE, x = -60, y = 44.5), color='orange', size = 4)
-#
+
 # Plot the map
 mmap
-#
-# The END
+```
